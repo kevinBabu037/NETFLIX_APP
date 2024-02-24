@@ -1,17 +1,19 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:netflix_app/api/api.dart';
 import 'package:netflix_app/core/colors/colors.dart';
 import 'package:netflix_app/core/constant.dart';
+import 'package:netflix_app/models/movies.dart';
 import 'package:netflix_app/presentation/widgets/app_bar_widget.dart';
 
 class Screendownloads extends StatelessWidget {
     Screendownloads({super.key});
 
   final _widgetList= [
-         _SmartDownloads(),
-          Section2(),
-          Section3()        
+       const  _SmartDownloads(),
+        const  Section2(),
+        const  Section3()        
         ];
 
   @override
@@ -45,8 +47,23 @@ class _SmartDownloads extends StatelessWidget {
   }
 }
 /////
-class Section2 extends StatelessWidget {
+class Section2 extends StatefulWidget {
   const Section2({super.key});
+
+  @override
+  State<Section2> createState() => _Section2State();
+}
+
+class _Section2State extends State<Section2> {
+
+ late Future <List<Movie>> topTen;
+
+  @override
+  void initState() {
+    super.initState();
+      topTen=Api().getTopRatedMovies();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +113,7 @@ class Section2 extends StatelessWidget {
     );
   }
 }
+
 ////
 
 class Section3 extends StatelessWidget {

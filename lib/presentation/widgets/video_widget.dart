@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:netflix_app/core/constant.dart';
+import 'package:netflix_app/models/movies.dart';
 
 import '../../core/colors/colors.dart';
 
 class VideoWidget extends StatelessWidget {
   const VideoWidget({
     super.key,
+    required this.movie
   });
-
+   final Movie movie;
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         SizedBox(
           width: double.infinity,
-          height: 200,
-          child: Image.network('https://i.pinimg.com/564x/0f/82/f2/0f82f241e5d86d7d4c60ab6d45559e01.jpg',fit: BoxFit.cover,),
+          height: 200, 
+          child: Image.network(
+             "${Constants.imagePath}${movie.posterPath}"
+            ,fit: BoxFit.cover,), 
         ),
         Positioned(
           bottom: 7,

@@ -1,13 +1,31 @@
 
 import 'package:flutter/material.dart';
+import 'package:netflix_app/api/api.dart';
 import 'package:netflix_app/core/colors/colors.dart';
+import 'package:netflix_app/models/movies.dart';
 import '../../core/constant.dart';
 import 'widgets/coming_soon_widget.dart';
 import 'widgets/every_one_watching.dart';
 
 
-class ScreenNewAndHot extends StatelessWidget {
+class ScreenNewAndHot extends StatefulWidget {
   const ScreenNewAndHot({super.key});
+
+  @override
+  State<ScreenNewAndHot> createState() => _ScreenNewAndHotState();
+}
+
+class _ScreenNewAndHotState extends State<ScreenNewAndHot> {
+
+  late Future <List<Movie>> popular;
+  late Future <List<Movie>> topTen;
+
+  @override
+  void initState() {
+    super.initState();
+      popular=Api().getTenseDramaMovies();
+      topTen=Api().getTopRatedMovies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,32 +68,59 @@ class ScreenNewAndHot extends StatelessWidget {
           body:TabBarView(
             children: [
 
-              _buildComingSoon(),
-              _buildEveryOneWatching(),
+              _buildComingSoon(popular),
+              _buildEveryOneWatching(topTen),
 
             ]
           )
       ),
     );
   }
+
+ Widget _buildComingSoon( Future <List<Movie>> categorey) {
   
- Widget _buildComingSoon() {
-     return ListView.builder(
-        itemCount: 10,
-         itemBuilder: (context, index) {
-          
-           return const ComimgSoonWidget();
-         },
-      
+     return FutureBuilder(
+       future: categorey,
+       builder: (context, snapshot) {
+          if(snapshot.connectionState==ConnectionState.waiting){
+            return const Center(child: CircularProgressIndicator(),);
+          }else if(snapshot.hasError){
+           return const Center(child: Text('Server Busy'));
+          }else{
+            return ListView.builder(
+          itemCount: snapshot.data!.length,
+           itemBuilder: (context, index) {
+            final movie = snapshot.data?[index];
+             return  ComimgSoonWidget(movie: movie!); 
+           }, 
+       ); 
+          }
+         
+       },
      );
-  }
+  } 
 }
 
-Widget _buildEveryOneWatching() {
-  return ListView.builder(
-    itemCount: 10,
-    itemBuilder: (context, index) { 
-      return const EveryOneWatchingWidget();
-    },);
+Widget _buildEveryOneWatching(Future <List<Movie>> categorey) {
+  return  FutureBuilder(
+       future: categorey,
+       builder: (context, snapshot) {
+          if(snapshot.connectionState==ConnectionState.waiting){
+            return const Center(child: CircularProgressIndicator(),);
+          }else if(snapshot.hasError){
+            return const Center(child: Text('Server busy'),);
+          }else{
+              return ListView.builder(
+          itemCount: snapshot.data!.length,
+           itemBuilder: (context, index) {
+            final movie = snapshot.data?[index];
+             return  EveryOneWatchingWidget(movie: movie!,); 
+     
+           }, 
+       );
+          }
+         
+       },
+     );
 }
 

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:netflix_app/presentation/search/widgets/search_idle.dart';
+import 'package:netflix_app/core/constant.dart';
 import 'package:netflix_app/presentation/search/widgets/title.dart';
 
-class SearchResultWidget extends StatelessWidget {
-  const SearchResultWidget({super.key});
 
+class SearchResultWidget extends StatelessWidget {
+  const SearchResultWidget({super.key,required this.snapshot});
+  final AsyncSnapshot snapshot;
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start,
@@ -14,9 +15,9 @@ class SearchResultWidget extends StatelessWidget {
           child: GridView.count( 
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            childAspectRatio: 1/1.5,     
+            childAspectRatio: 1/1.5,      
             crossAxisCount: 3,
-            children: List.generate(20, (index) =>const MainSearchCard() ),
+            children: List.generate(snapshot.data.length, (index) => MainSearchCard(index:index ,snapshot: snapshot,) ),
             ),
         ) 
       ],
@@ -25,16 +26,17 @@ class SearchResultWidget extends StatelessWidget {
 }
 
 class MainSearchCard extends StatelessWidget {
-  const MainSearchCard({super.key});
-
+  const MainSearchCard({super.key,required this.index,required this.snapshot});
+   final int index;
+   final AsyncSnapshot snapshot;
   @override
   Widget build(BuildContext context) {
     return Container(
       margin:const EdgeInsets.only(right: 5 ,top: 5),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        image:const DecorationImage( 
-          image: NetworkImage(imageUrl,),fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(8), 
+        image: DecorationImage( 
+          image: NetworkImage("${Constants.imagePath}${snapshot.data[index].posterPath}"),fit: BoxFit.cover,
           )
       ),
     );

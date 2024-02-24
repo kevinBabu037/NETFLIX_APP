@@ -3,25 +3,54 @@ import 'package:flutter/material.dart';
 import 'package:netflix_app/core/colors/colors.dart';
 import 'package:netflix_app/core/constant.dart';
 import 'package:netflix_app/presentation/search/widgets/title.dart';
+
+import '../../../api/api.dart';
+import '../../../models/movies.dart';
  const imageUrl="https://i.pinimg.com/564x/1a/97/84/1a9784a78effe5ceb7580783b84e02a0.jpg";
 
-class SearchIdleWidget extends StatelessWidget {
+class SearchIdleWidget extends StatefulWidget {
   const SearchIdleWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<SearchIdleWidget> createState() => _SearchIdleWidgetState();
+}
+
+class _SearchIdleWidgetState extends State<SearchIdleWidget> {
+
+  late Future <List<Movie>> searchIdle;
+  @override
+  void initState() {
+    super.initState();
+   searchIdle = Api().searchPageIdle();
+  }
+ 
+  @override 
+  Widget build(BuildContext context) { 
     
     return Column(crossAxisAlignment: CrossAxisAlignment.start,  
       children: [
        const SearchTitle(title:'Top Searches'),
               kHeight,
               Expanded(
-                child: ListView.separated( 
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) =>const TopSearchItrmTile() , 
-                  separatorBuilder: (context, index) => kHeight20  , 
-                  itemCount: 10
-                  ), 
+                child: FutureBuilder(
+                 future: searchIdle,
+                 builder: (context, snapshot) {
+                    if(snapshot.connectionState==ConnectionState.waiting){
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }if(snapshot.hasError){
+                      return const Center(child: Text("server Busy") ,);
+                    }else{
+                     return ListView.separated( 
+                    itemBuilder: (context, index) => TopSearchItrmTile(snapshot: snapshot,index: index), 
+                    separatorBuilder: (context, index) => kHeight20 , 
+                    itemCount: snapshot.data!.length
+                    );
+                    }
+                    
+                 },
+                ), 
               )
       ], 
       
@@ -31,8 +60,15 @@ class SearchIdleWidget extends StatelessWidget {
 
 
 
+// ignore: must_be_immutable
 class TopSearchItrmTile extends StatelessWidget {
-  const TopSearchItrmTile({super.key});
+   TopSearchItrmTile({
+    super.key,
+    required this.snapshot,
+    required this.index,
+    });
+  final AsyncSnapshot snapshot;
+  int index;
   
   @override 
   Widget build(BuildContext context) {
@@ -42,19 +78,19 @@ class TopSearchItrmTile extends StatelessWidget {
         Container( 
           width:screenWidth*0.36,
           height:80, 
-          decoration: BoxDecoration(
+          decoration: BoxDecoration( 
             borderRadius:BorderRadius.circular(8),
-            image:const DecorationImage(
-              image: NetworkImage(imageUrl),
+            image: DecorationImage(
+              image: NetworkImage("${Constants.imagePath}${snapshot.data[index].posterPath}"),
               fit: BoxFit.cover),
           ),
         ),
         kWidth,
-       const Expanded(
-          child:  Text('movie Name',style: TextStyle(fontSize: 16,
+        Expanded(
+          child:  Text(snapshot.data[index].title,style:const TextStyle(fontSize: 16,
               fontWeight: FontWeight.bold),),
         ),
-
+        kWidth,
        const CircleAvatar(
         radius: 24 ,
           backgroundColor: kWhite,

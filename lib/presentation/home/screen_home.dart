@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:netflix_app/api/api.dart';
 import 'package:netflix_app/core/constant.dart';
+import 'package:netflix_app/models/movies.dart';
 import 'package:netflix_app/presentation/home/widgets/number_title_card.dart';
-import 'package:netflix_app/presentation/widgets/main_title_with_card.dart';
-
 import 'widgets/background_img_card.dart';
+import 'widgets/categorey_sliders.dart';
+
  ValueNotifier<bool> scrollNotifer=ValueNotifier(true);
-class ScreenHome extends StatelessWidget {
+
+class ScreenHome extends StatefulWidget {
   const ScreenHome({super.key}); 
 
   @override
+  State<ScreenHome> createState() => _ScreenHomeState();
+}
+
+class _ScreenHomeState extends State<ScreenHome> {
+
+  late Future <List<Movie>> trendingMovies;
+  late Future <List<Movie>> topTengMovies;
+  late Future <List<Movie>> tenseDramas;
+  late Future <List<Movie>> popular;
+
+  @override
+  void initState() {
+    super.initState();
+    trendingMovies=Api().getTrendingMovies();
+    topTengMovies=Api().getTopRatedMovies();
+    tenseDramas=Api().getTenseDramaMovies();
+    popular=Api().getPopularMovies();
+    
+  }
+ 
+  @override 
   Widget build(BuildContext context) {
+   
     return  Scaffold(
       body:ValueListenableBuilder(
-        valueListenable:scrollNotifer ,
+        valueListenable:scrollNotifer , 
          builder: (context, value, child) {
            return  NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
@@ -29,27 +54,61 @@ class ScreenHome extends StatelessWidget {
         child: Stack(
           children: [
             ListView(
-              children:const [
+              children: [ 
 
-                BackgroundCard(),
+               const BackgroundCard(),
 
-                MainTitleWithCard(title: 'Relesed In Past Year'), 
-                kHeight15, 
+               categorySliders(
+                context: context, 
+                categorey: trendingMovies,
+                 title: 'Trending Now'), 
 
-                MainTitleWithCard(title:'Tranding Now'), 
-                kHeight15, 
-                NumberTitleCard(),
+                kHeight15,  
+
+                 
+                SizedBox(
+                  child: FutureBuilder( 
+                      future: topTengMovies,
+                      builder: (context, snapshot) {
+                      if(snapshot.hasError){
+                       return const Center(child:Text('server Busy') ,);
+                      }else if(snapshot.hasData){
+                        return NumberTitleCard(snapShot:snapshot); 
+                      }else{
+                        return const Center(child: CircularProgressIndicator(),);
+                      }
+                      },
+                    ),
+                ),
+
                  kHeight, 
-                MainTitleWithCard(title:'Tense Dramas'), 
-                  kHeight15, 
-                MainTitleWithCard(title:'South Indian Cinema'),
-                 kHeight, 
+
+                 categorySliders(
+                context: context, 
+                categorey: tenseDramas, 
+                 title: 'Tense Drama'),
+                  
+                  kHeight, 
+
+                  categorySliders(
+                context: context, 
+                categorey: trendingMovies,
+                 title: 'Top Rated'),  
+
+                  kHeight,
+                 categorySliders(
+                context: context, 
+                categorey: popular,
+                 title: 'South Indian Movies'
+                 ),
+
+                      kHeight, 
               ],
             ),
             
               scrollNotifer.value ?  Container(  
                   height: 90,
-                  width: double.infinity,
+                  width: double.infinity, 
                   color: Colors.black.withOpacity(0.4),  
                   child: Column( 
                     children: [
@@ -95,10 +154,8 @@ class ScreenHome extends StatelessWidget {
     );
   }
 
- 
 }
 
-
-
+ 
 
 
